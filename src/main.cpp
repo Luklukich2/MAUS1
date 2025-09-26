@@ -60,7 +60,7 @@ void setup()
 
 void loop()
 {
-    drive(left_u, -right_u);
+    drive(left_u, right_u);
 
 
     delay(1);
