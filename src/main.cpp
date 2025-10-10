@@ -3,13 +3,14 @@
 
 #include "voltage_sensor.h"
 #include "Motor.h"
+#include "Encoder.h"
 
 int left_u = 0;
 int right_u = 0;
 
 SCREEN(volts,
     {
-        ROW("Vbatt [mv]: %d", int(get_v_batt() * 1000));
+        ROW("Vbatt [mv]: %d", int(vs_get_v_batt() * 1000));
         CLICK_ROW(
             [](CLICK_STATE state){
                 switch(state){
@@ -48,19 +49,32 @@ SCREEN(volts,
         )
     }
 )
+SCREEN(encoders,
+    {
+        ROW("Left: AB: %d", enc_l_get_ticks());
+        ROW("Right: AB: %d", enc_r_get_ticks());
+    })
 
 void setup()
 {
     Serial.begin(115200);
 
+    m_init();
+    vs_init();
+    enc_l_init();
+    enc_r_init();
+
+    interrupts();
+
     argviz_init(Serial);
     argviz_registerScreen(0, volts);
+    argviz_registerScreen(1, encoders);
     argviz_start();
 }
 
 void loop()
 {
-    drive(left_u, right_u);
+    m_drive(left_u, right_u);
 
 
     delay(1);
