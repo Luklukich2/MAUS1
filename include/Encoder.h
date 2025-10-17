@@ -8,9 +8,13 @@
 #define ENC_RIGHT_B_PIN 5
 #define LEFT_ENC_DIR -1
 #define RIGHT_ENC_DIR 1
+#define ENC_TICK_TO_RAD (2 * M_PI / (48 * 30))
 
 int8_t enc_l_tt[4][4] = {0};
 int8_t enc_r_tt[4][4] = {0};
+
+float enc_l_phi = 0;
+float enc_r_phi = 0;
 
 volatile int enc_l_counter = 0;
 volatile int enc_r_counter = 0;
@@ -99,4 +103,34 @@ int enc_r_get_ticks()
     int ret = enc_r_counter;
     interrupts();
     return ret;
+}
+
+void enc_l_tick()
+{
+    noInterrupts();
+    int counter = enc_l_counter;
+    enc_l_counter = 0;
+    interrupts();
+
+    enc_l_phi += ENC_TICK_TO_RAD * counter;
+}
+
+float enc_l_get_phi()
+{
+    return enc_l_phi;
+}
+
+void enc_r_tick()
+{
+    noInterrupts();
+    int counter = enc_r_counter;
+    enc_r_counter = 0;
+    interrupts();
+
+    enc_r_phi += ENC_TICK_TO_RAD * counter;
+}
+
+float enc_r_get_phi()
+{
+    return enc_r_phi;
 }
