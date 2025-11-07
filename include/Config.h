@@ -9,3 +9,7 @@
 // Servo motor
 #define SERVO_KP 3.0
 #define SERVO_KI 20.0
+
+// Robot
+#define ROBOT_WIDTH 0.075 // [m]
+#define ROBOT_WHEEL_RADIUS 0.0165 // [m]
