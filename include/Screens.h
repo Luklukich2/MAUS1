@@ -7,6 +7,7 @@
 #include "VE.h"
 #include "voltage_sensor.h"
 #include "fnSelector.h"
+#include "Odometer.h"
 
 int left_u = 0;
 int right_u = 0;
@@ -65,7 +66,7 @@ SCREEN(encoders,
            ROW("fn_select[]: %d", fns_tick(analogRead(FN_SELECTOR_PIN)));
        })
 
-SCREEN(servo,
+SCREEN(mixer,
        {CLICK_ROW([](CLICK_STATE state)
                   {
         switch (state)
@@ -99,4 +100,7 @@ SCREEN(servo,
             default:
                 break;
             } },
-                          "v_0: %s", String(v_0).c_str())})
+                          "v_0: %s", String(v_0).c_str())
+                        ROW("odom_S: %s", String(odom_get_S()).c_str())
+                        ROW("odom_theta: %s", String(odom_get_theta()).c_str())
+                        })

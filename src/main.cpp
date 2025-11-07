@@ -10,6 +10,7 @@
 #include "Servo_motor.h"
 #include "Mixer.h"
 #include "Screens.h"
+#include "Odometer.h"
 
 void setup()
 {
@@ -26,7 +27,7 @@ void setup()
     argviz_init(Serial);
     argviz_registerScreen(0, volts);
     argviz_registerScreen(1, encoders);
-    argviz_registerScreen(2, servo);
+    argviz_registerScreen(2, mixer);
     argviz_start();
 }
 
@@ -37,8 +38,9 @@ void loop()
     while (micros() - timer < Ts_us)
         ;
     timer = micros();
+    
     // Sense
-
+    odom_tick();
     // Plan
 
     // Act
