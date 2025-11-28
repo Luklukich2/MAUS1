@@ -21,7 +21,7 @@ void odom_tick()
     float v_r = w_r * ROBOT_WHEEL_RADIUS;
 
     float v = (v_l + v_r) / 2;
-    float theta_i = (v_l - v_r) / ROBOT_WIDTH;
+    float theta_i = (v_r - v_l) / ROBOT_WIDTH;
 
     odom_S += v * Ts_s;
     odom_theta += theta_i * Ts_s;

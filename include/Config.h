@@ -13,3 +13,10 @@
 // Robot
 #define ROBOT_WIDTH 0.075 // [m]
 #define ROBOT_WHEEL_RADIUS 0.0165 // [m]
+
+// Movement parameters
+#define MAX_VEL 0.1 // [m/s]
+#define MAX_ANG_VEL 1.0 // [rad/s]
+
+// Maze parameters
+#define CELL_WIDHT 0.18 // [m]
