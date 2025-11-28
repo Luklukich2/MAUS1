@@ -11,78 +11,8 @@
 #include "Mixer.h"
 #include "Screens.h"
 #include "Odometer.h"
+#include "Cyclogramms.h"
 
-void stop()
-{
-    odom_reset();
-    while (true)
-    {
-        // Timer
-        static uint32_t timer = micros();
-        while (micros() - timer < Ts_us)
-            ;
-        timer = micros();
-
-        // Sense
-        odom_tick();
-        // Plan
-        v_0 = 0;
-        tetha_i0 = 0;
-        // Act
-        mixer_tick(v_0, tetha_i0);
-    }
-}
-
-void fwd()
-{
-    odom_reset();
-    while (true)
-    {
-        // Timer
-        static uint32_t timer = micros();
-        while (micros() - timer < Ts_us)
-            ;
-        timer = micros();
-
-        // Sense
-        odom_tick();
-        // Plan
-        v_0 = MAX_VEL;
-        tetha_i0 = 0;
-
-        if (odom_get_S() > CELL_WIDHT)
-        {
-            return;
-        }
-        // Act
-        mixer_tick(v_0, tetha_i0);
-    }
-}
-
-void left()
-{
-    odom_reset();
-    while(true)
-    {
-        // Timer
-        static uint32_t timer = micros();
-        while (micros() - timer < Ts_us)
-            ;
-        timer = micros();
-
-        // Sense
-        odom_tick();
-        // Plan
-        v_0 = 0;
-        tetha_i0 = MAX_ANG_VEL;
-        if (odom_get_theta() > M_PI / 2)
-        {
-            return;
-        }
-        // Act
-        mixer_tick(v_0, tetha_i0);
-    }
-}
 
 void setup()
 {
@@ -101,14 +31,14 @@ void setup()
     argviz_registerScreen(1, encoders);
     argviz_registerScreen(2, mixer);
     // argviz_start();
-    fwd();
-    left();
-    fwd();
-    left();
-    fwd();
-    left();
-    fwd();
-    left();
+    FWD_1c();
+    SS90IL();
+    FWD_1c();
+    SS90IL();
+    FWD_1c();
+    SS90IL();
+    FWD_1c();
+    SS90IL();
     stop();
 }
 
