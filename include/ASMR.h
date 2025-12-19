@@ -82,11 +82,14 @@ enum ASMR_CYC : uint8_t
 #define TURN_RIGHT 0b00000001
 
 ASMR_entry asmr_prog_buffer[ASMR_PROG_BUFFER_SIZE] = {
-    SWD + 4,
-    // SS90SEL,
-    // SWD1,
-    // SS90SEL,
-    // SWD05,
+    SWD1,
+    TURN_CYC + TURN_LEFT + T90 + FROM_STRAIGHT,
+    SWD1,
+    TURN_CYC + TURN_LEFT + T90 + FROM_STRAIGHT,
+    SWD1,
+    TURN_CYC + TURN_LEFT + T90 + FROM_STRAIGHT,
+    SWD1,
+    TURN_CYC + TURN_LEFT + T90 + FROM_STRAIGHT,
     STOP,
 };
 
@@ -141,9 +144,9 @@ const float turn_smooth_distances[][2] = {
 
 void asmr_cyc_turn(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
 {
-    uint8_t turn_type = cyc.raw & 0b00110000 >> 4;
-    uint8_t turn_source = cyc.raw & 0b00001000 >> 3;
-    uint8_t turn_angle = cyc.raw & 0b00000110 >> 1;
+    uint8_t turn_type = (cyc.raw & 0b00110000) >> 4;
+    uint8_t turn_source = (cyc.raw & 0b00001000) >> 3;
+    uint8_t turn_angle = (cyc.raw & 0b00000110) >> 1;
     uint8_t turn_dir = cyc.raw & 0b00000001;
 
     uint8_t turn_dest = (~turn_angle & 0b1) ^ turn_source;
@@ -154,21 +157,20 @@ void asmr_cyc_turn(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
     {
         float first_dist = turn_smooth_distances[turn_angle][turn_source];
         float second_dist = turn_smooth_distances[turn_angle][turn_dest];
-        float turn_dist = DEG_TO_RAD * TURN_RADIUS_SHORTEST;
+        float turn_dist = turn_delta_tetha * TURN_RADIUS_SHORTEST;
 
-        
         if (data.odom_S < first_dist)
         {
-            asmr_cyc_forw(output, data, ASMR_entry{FORW << 6 | turn_source << 5});
+            asmr_cyc_forw(output, data, ASMR_entry{(FORW << 6) | (turn_source << 5)});
         }
-        else if (data.odom_S < turn_dist)
+        else if (data.odom_S < first_dist + turn_dist)
         {
             output->v_0 = MAX_VEL;
             output->theta_i0 = turn_dir ? -MAX_ANG_VEL : MAX_ANG_VEL;
         }
-        else if (data.odom_S < second_dist)
+        else if (data.odom_S < first_dist + turn_dist + second_dist)
         {
-            asmr_cyc_forw(output, data, ASMR_entry{FORW << 6 | turn_dest << 5});
+            asmr_cyc_forw(output, data, ASMR_entry{(FORW << 6) | (turn_dest << 5)});
         }
 
         output->is_completed = data.odom_S > (first_dist + turn_dist + second_dist);
