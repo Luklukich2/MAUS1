@@ -11,7 +11,7 @@
 #include "Mixer.h"
 #include "Screens.h"
 #include "Odometer.h"
-#include "Cyclogramms.h"
+#include "ASMR.h"
 
 
 void setup()
@@ -23,23 +23,16 @@ void setup()
     vs_init();
     enc_l_init();
     enc_r_init();
+    asmr_init();
 
     interrupts();
 
     argviz_init(Serial);
-    argviz_registerScreen(0, volts);
+    argviz_registerScreen(3, volts);
     argviz_registerScreen(1, encoders);
-    argviz_registerScreen(2, mixer);
-    // argviz_start();
-    FWD_1c();
-    SS90IL();
-    FWD_1c();
-    SS90IL();
-    FWD_1c();
-    SS90IL();
-    FWD_1c();
-    SS90IL();
-    stop();
+    argviz_registerScreen(0, mixer);
+    argviz_registerScreen(3, asmr);
+    argviz_start();
 }
 
 void loop()
@@ -51,9 +44,8 @@ void loop()
     timer = micros();
 
     // Sense
-    odom_tick();
+    // odom_tick();
     // Plan
-
     // Act
-    mixer_tick(v_0, tetha_i0);
+    asmr_tick();
 }

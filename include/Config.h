@@ -18,5 +18,10 @@
 #define MAX_VEL 0.1 // [m/s]
 #define MAX_ANG_VEL 1.0 // [rad/s]
 
+#define TURN_RADIUS_SHORTEST 0.05 // [m]
+
 // Maze parameters
 #define CELL_WIDHT 0.18 // [m]
+
+// ASMR parameters
+#define ASMR_PROG_BUFFER_SIZE 64

@@ -8,6 +8,7 @@
 #include "voltage_sensor.h"
 #include "fnSelector.h"
 #include "Odometer.h"
+#include "ASMR.h"
 
 int left_u = 0;
 int right_u = 0;
@@ -84,8 +85,8 @@ SCREEN(mixer,
             break;
         } },
                   "tetha_i0: %s", String(tetha_i0).c_str())
-                CLICK_ROW([](CLICK_STATE state)
-                          {
+            CLICK_ROW([](CLICK_STATE state)
+                      {
             switch (state)
             {
             case CLICK_LEFT:
@@ -100,7 +101,11 @@ SCREEN(mixer,
             default:
                 break;
             } },
-                          "v_0: %s", String(v_0).c_str())
-                        ROW("odom_S: %s", String(odom_get_S()).c_str())
-                        ROW("odom_theta: %s", String(odom_get_theta()).c_str())
-                        })
+                      "v_0: %s", String(v_0).c_str())
+                ROW("odom_S: %s", String(odom_get_S()).c_str())
+                    ROW("odom_theta: %s", String(odom_get_theta()).c_str())})
+SCREEN(asmr,
+
+       {
+        ROW("prog_couter %d", asmr_get_prog_counter())
+       })
