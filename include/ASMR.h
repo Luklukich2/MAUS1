@@ -71,7 +71,7 @@ enum ASMR_CYC : uint8_t
 
 #define SHORTEST 0
 #define EXPLORE 0b00010000
-#define INPLACE 0b00100000
+#define IN_PLACE 0b00100000
 
 #define T45 0
 #define T90 0b00000010
@@ -83,7 +83,13 @@ enum ASMR_CYC : uint8_t
 
 ASMR_entry asmr_prog_buffer[ASMR_PROG_BUFFER_SIZE] = {
     SWD + 1,
-    TURN_CYC + SHORTEST + FROM_STRAIGHT + T45 + TURN_RIGHT,
+    TURN_CYC + EXPLORE + FROM_STRAIGHT + T90+ TURN_RIGHT,
+    SWD + 1,
+    TURN_CYC + EXPLORE + FROM_STRAIGHT + T90+ TURN_RIGHT,
+    SWD + 1,
+    TURN_CYC + IN_PLACE + FROM_STRAIGHT + T90 + TURN_RIGHT,
+    SWD + 1,
+    TURN_CYC + IN_PLACE + FROM_STRAIGHT + T90 + TURN_RIGHT,
     STOP,
 };
 
@@ -114,6 +120,7 @@ void asmr_cyc_forw(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
     output->v_0 = MAX_VEL;
     output->theta_i0 = 0;
 
+    // uint8_t dist_half_int = cyc.forw.forw_dist;
     uint8_t dist_half_int = cyc.raw & 0b00011111;
 
     float dist_mul = 1.0;
@@ -129,14 +136,14 @@ void asmr_cyc_forw(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
 }
 
 const float turn_smooth_distances[][2] = {
-//        {S  D}
+    //        {S  D}
     [0] = {CELL_WIDHT / 2 - TURN_RADIUS_SHORTEST * tan(M_PI / 8),
-           CELL_WIDHT * M_SQRT1_2 - TURN_RADIUS_SHORTEST * tan(M_PI / 8)},
+           CELL_WIDHT *M_SQRT1_2 - TURN_RADIUS_SHORTEST *tan(M_PI / 8)},
     [1] = {CELL_WIDHT - TURN_RADIUS_SHORTEST,
            CELL_WIDHT *M_SQRT1_2 - TURN_RADIUS_SHORTEST},
     [2] = {3.0 / 2 * CELL_WIDHT - TURN_RADIUS_SHORTEST * tan(3.0 / 8 * M_PI),
-           CELL_WIDHT * M_SQRT2 - TURN_RADIUS_SHORTEST * tan(3.0 /8*M_PI)},
-    [3] = {CELL_WIDHT / 2 + (M_PI * (CELL_WIDHT / 2)), 0},
+           CELL_WIDHT *M_SQRT2 - TURN_RADIUS_SHORTEST *tan(3.0 / 8 * M_PI)},
+    [3] = {CELL_WIDHT / 2, 0},
 };
 
 void asmr_cyc_turn(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
@@ -148,38 +155,78 @@ void asmr_cyc_turn(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
 
     uint8_t turn_dest = (~turn_angle & 0b1) ^ turn_source;
 
-    float turn_delta_tetha = (45 + 45 * turn_angle) * DEG_TO_RAD;
+    float turn_delta_theta = (45 + 45 * turn_angle) * DEG_TO_RAD;
     float turn_radius = 0;
 
-    if (turn_type == 0)
+    float first_dist = 0;
+    float turn_dist = 0;
+    float second_dist = 0;
+
+    float turn_vel_f = 0;
+    float turn_vel_w = 0;
+
+    if (turn_type == 0) // Shortest
     {
         if (turn_angle == 3)
         {
             turn_radius = CELL_WIDHT / 2;
-        }else{
+        }
+        else
+        {
             turn_radius = TURN_RADIUS_SHORTEST;
         }
-        float first_dist = turn_smooth_distances[turn_angle][turn_source];
-        float second_dist = turn_smooth_distances[turn_angle][turn_dest];
-        float turn_dist = turn_delta_tetha * turn_radius;
 
-        if (data.odom_S < first_dist)
-        {
-            asmr_cyc_forw(output, data, ASMR_entry{(FORW << 6) | (turn_source << 5)});
-        }
-        else if (data.odom_S < first_dist + turn_dist)
-        {
-            output->v_0 = MAX_VEL;
-            float turn_vel = MAX_VEL / turn_radius;
-            output->theta_i0 = turn_dir ? -turn_vel : turn_vel;
-        }
-        else if (data.odom_S < first_dist + turn_dist + second_dist)
-        {
-            asmr_cyc_forw(output, data, ASMR_entry{(FORW << 6) | (turn_dest << 5)});
-        }
+        first_dist = turn_smooth_distances[turn_angle][turn_source];
+        turn_dist = turn_delta_theta * turn_radius;
+        second_dist = turn_smooth_distances[turn_angle][turn_dest];
 
-        output->is_completed = data.odom_S > (first_dist + turn_dist + second_dist);
+        turn_vel_f = MAX_VEL;
+        float turn_vel = MAX_VEL / turn_radius;
+        turn_vel_w = turn_dir ? -turn_vel : turn_vel;
     }
+    else if (turn_type == 1) // EXPLORE
+    {
+        turn_radius = TURN_RADIUS_EXPLORE;
+
+        if (turn_angle != 1)
+        {
+            Serial.println("EXPLORE turn_angle != 90");
+            return;
+        }
+
+        first_dist = CELL_WIDHT / 2 - turn_radius;
+        turn_dist = M_PI_4 * turn_radius;
+        second_dist = first_dist;
+
+        turn_vel_f = MAX_VEL;
+        float turn_vel = MAX_VEL / turn_radius;
+        turn_vel_w = turn_dir ? -turn_vel : turn_vel;
+    }
+    else if (turn_type == 2) // IN PLACE
+    {
+        turn_radius = 0;
+
+        first_dist = CELL_WIDHT / 2;
+        turn_dist = 0;
+        second_dist = CELL_WIDHT / 2;
+    }
+
+    if (data.odom_S < first_dist)
+    {
+        asmr_cyc_forw(output, data, ASMR_entry{(FORW << 6) | (turn_source << 5)});
+    }
+    // else if (data.odom_S < first_dist + turn_dist)
+    else if (fabs(data.odom_theta) < turn_delta_theta)
+    {
+        output->v_0 = turn_vel_f;
+        output->theta_i0 = turn_vel_w;
+    }
+    else if (data.odom_S < first_dist + turn_dist + second_dist)
+    {
+        asmr_cyc_forw(output, data, ASMR_entry{(FORW << 6) | (turn_dest << 5)});
+    }
+
+    output->is_completed = data.odom_S > (first_dist + turn_dist + second_dist);
 }
 
 size_t asmr_prog_couter = 0;

@@ -18,7 +18,8 @@
 #define MAX_VEL 0.10 // [m/s]
 #define MAX_ANG_VEL 1.0 // [rad/s]
 
-#define TURN_RADIUS_SHORTEST 0.05 // [m]
+#define TURN_RADIUS_SHORTEST 0.09 // [m]
+#define TURN_RADIUS_EXPLORE 0.05 // [m]
 
 // Maze parameters
 #define CELL_WIDHT 0.18 // [m]
