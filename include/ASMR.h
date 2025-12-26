@@ -82,14 +82,8 @@ enum ASMR_CYC : uint8_t
 #define TURN_RIGHT 0b00000001
 
 ASMR_entry asmr_prog_buffer[ASMR_PROG_BUFFER_SIZE] = {
-    SWD1,
-    TURN_CYC + TURN_LEFT + T90 + FROM_STRAIGHT,
-    SWD1,
-    TURN_CYC + TURN_LEFT + T90 + FROM_STRAIGHT,
-    SWD1,
-    TURN_CYC + TURN_LEFT + T90 + FROM_STRAIGHT,
-    SWD1,
-    TURN_CYC + TURN_LEFT + T90 + FROM_STRAIGHT,
+    SWD + 1,
+    TURN_CYC + SHORTEST + FROM_STRAIGHT + T45 + TURN_RIGHT,
     STOP,
 };
 
@@ -135,11 +129,14 @@ void asmr_cyc_forw(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
 }
 
 const float turn_smooth_distances[][2] = {
-    [0] = {0, 0},
+//        {S  D}
+    [0] = {CELL_WIDHT / 2 - TURN_RADIUS_SHORTEST * tan(M_PI / 8),
+           CELL_WIDHT * M_SQRT1_2 - TURN_RADIUS_SHORTEST * tan(M_PI / 8)},
     [1] = {CELL_WIDHT - TURN_RADIUS_SHORTEST,
            CELL_WIDHT *M_SQRT1_2 - TURN_RADIUS_SHORTEST},
-    [2] = {0, 0},
-    [3] = {0, 0},
+    [2] = {3.0 / 2 * CELL_WIDHT - TURN_RADIUS_SHORTEST * tan(3.0 / 8 * M_PI),
+           CELL_WIDHT * M_SQRT2 - TURN_RADIUS_SHORTEST * tan(3.0 /8*M_PI)},
+    [3] = {CELL_WIDHT / 2 + (M_PI * (CELL_WIDHT / 2)), 0},
 };
 
 void asmr_cyc_turn(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
@@ -152,12 +149,19 @@ void asmr_cyc_turn(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
     uint8_t turn_dest = (~turn_angle & 0b1) ^ turn_source;
 
     float turn_delta_tetha = (45 + 45 * turn_angle) * DEG_TO_RAD;
+    float turn_radius = 0;
 
     if (turn_type == 0)
     {
+        if (turn_angle == 3)
+        {
+            turn_radius = CELL_WIDHT / 2;
+        }else{
+            turn_radius = TURN_RADIUS_SHORTEST;
+        }
         float first_dist = turn_smooth_distances[turn_angle][turn_source];
         float second_dist = turn_smooth_distances[turn_angle][turn_dest];
-        float turn_dist = turn_delta_tetha * TURN_RADIUS_SHORTEST;
+        float turn_dist = turn_delta_tetha * turn_radius;
 
         if (data.odom_S < first_dist)
         {
@@ -166,7 +170,8 @@ void asmr_cyc_turn(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
         else if (data.odom_S < first_dist + turn_dist)
         {
             output->v_0 = MAX_VEL;
-            output->theta_i0 = turn_dir ? -MAX_ANG_VEL : MAX_ANG_VEL;
+            float turn_vel = MAX_VEL / turn_radius;
+            output->theta_i0 = turn_dir ? -turn_vel : turn_vel;
         }
         else if (data.odom_S < first_dist + turn_dist + second_dist)
         {

@@ -4,7 +4,7 @@
 #define Ts_s (Ts_us / 1000000.0)
 
 // VE
-#define VE_LPF_T 0.005
+#define VE_LPF_T 0.05
 
 // Servo motor
 #define SERVO_KP 3.0
@@ -15,7 +15,7 @@
 #define ROBOT_WHEEL_RADIUS 0.0165 // [m]
 
 // Movement parameters
-#define MAX_VEL 0.1 // [m/s]
+#define MAX_VEL 0.10 // [m/s]
 #define MAX_ANG_VEL 1.0 // [rad/s]
 
 #define TURN_RADIUS_SHORTEST 0.05 // [m]

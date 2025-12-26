@@ -45,6 +45,11 @@ void loop()
 
     // Sense
     // odom_tick();
+    enc_l_tick();
+    enc_r_tick();
+
+    ve_l_tick(enc_l_get_phi());
+    ve_r_tick(enc_r_get_phi());
     // Plan
     // Act
     asmr_tick();
