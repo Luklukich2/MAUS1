@@ -9,6 +9,7 @@
 #include "fnSelector.h"
 #include "Odometer.h"
 #include "ASMR.h"
+#include "WallSensor.h"
 
 int left_u = 0;
 int right_u = 0;
@@ -108,4 +109,12 @@ SCREEN(asmr,
 
        {
         ROW("prog_couter %d", asmr_get_prog_counter())
+       })
+
+SCREEN(walls,
+       {
+           ROW("Front Left: %d", gFSensorLeft);
+           ROW("Front Right: %d", gFSensorRight);
+           ROW("Left: %d", gSensorLeft);
+           ROW("Right: %d", gSensorRight);
        })

@@ -26,3 +26,7 @@
 
 // ASMR parameters
 #define ASMR_PROG_BUFFER_SIZE 64
+
+// Wall sensors
+#define EMITTER_F 11
+#define EMITTER_S 12

@@ -12,6 +12,7 @@
 #include "Screens.h"
 #include "Odometer.h"
 #include "ASMR.h"
+#include "WallSensor.h"
 
 
 void setup()
@@ -24,6 +25,8 @@ void setup()
     enc_l_init();
     enc_r_init();
     asmr_init();
+    analogueSetup();
+    setupSystick();
 
     interrupts();
 
@@ -32,6 +35,7 @@ void setup()
     argviz_registerScreen(1, encoders);
     argviz_registerScreen(0, mixer);
     argviz_registerScreen(3, asmr);
+    argviz_registerScreen(4, walls);
     argviz_start();
 }
 
