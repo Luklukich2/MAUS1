@@ -82,13 +82,13 @@ enum ASMR_CYC : uint8_t
 #define TURN_RIGHT 0b00000001
 
 ASMR_entry asmr_prog_buffer[ASMR_PROG_BUFFER_SIZE] = {
-    SWD + 1,
+    SWD1,
     TURN_CYC + EXPLORE + FROM_STRAIGHT + T90+ TURN_RIGHT,
-    SWD + 1,
+    SWD1,
     TURN_CYC + EXPLORE + FROM_STRAIGHT + T90+ TURN_RIGHT,
-    SWD + 1,
+    SWD1,
     TURN_CYC + IN_PLACE + FROM_STRAIGHT + T90 + TURN_RIGHT,
-    SWD + 1,
+    SWD1,
     TURN_CYC + IN_PLACE + FROM_STRAIGHT + T90 + TURN_RIGHT,
     STOP,
 };
@@ -209,6 +209,9 @@ void asmr_cyc_turn(CyclogramOutput *output, SensorData data, ASMR_entry cyc)
         first_dist = CELL_WIDHT / 2;
         turn_dist = 0;
         second_dist = CELL_WIDHT / 2;
+
+        turn_vel_f = 0;
+        turn_vel_w = turn_dir ? -MAX_ANG_VEL : MAX_ANG_VEL;
     }
 
     if (data.odom_S < first_dist)
